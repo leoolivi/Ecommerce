@@ -1,5 +1,6 @@
 package com.ecommerce.main.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,12 @@ public class ProductController {
 
     @GetMapping("products/search")
     public ResponseEntity<List<Product>> searchProduct(@RequestParam String q) {
-        return ResponseEntity.ok(productService.getProducts());
+        var products = productService.getProducts();
+        var result = new ArrayList<Product>();
+        for (Product product: products) {
+            if(product.getName().contains(q)) result.add(product);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("products")

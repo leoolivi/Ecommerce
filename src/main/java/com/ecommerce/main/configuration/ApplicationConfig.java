@@ -19,7 +19,7 @@ public class ApplicationConfig {
     public CommandLineRunner commandLineRunner() {
         return (String... args) -> {
             productService.addProduct(Product.builder()
-                    .name("Product 1")
+                    .name("A qualcosa")
                     .description("Description")
                     .price((float) 18.99)
                     .stockQuantity(10)
@@ -27,7 +27,7 @@ public class ApplicationConfig {
                     .build());
             
             productService.addProduct(Product.builder()
-                    .name("Product 2")
+                    .name("B qualcosaltro")
                     .description("Description 2")
                     .price((float) 12.99)
                     .stockQuantity(5)
