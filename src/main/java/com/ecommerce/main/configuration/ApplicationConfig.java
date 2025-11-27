@@ -24,6 +24,7 @@ public class ApplicationConfig {
                     .price((float) 18.99)
                     .stockQuantity(10)
                     .category("Category 1")
+                    .imageUrl("")
                     .build());
             
             productService.addProduct(Product.builder()
@@ -32,6 +33,7 @@ public class ApplicationConfig {
                     .price((float) 12.99)
                     .stockQuantity(5)
                     .category("Category 1")
+                    .imageUrl("")
                     .build());
         };
     }

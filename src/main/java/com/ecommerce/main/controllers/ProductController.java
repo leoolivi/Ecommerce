@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,7 +38,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findProductById(id).orElseThrow(() -> new ProductNotFoundException("No product found with id: " + id)));
     }
 
-    @GetMapping("products/search")
+    @GetMapping("search/products")
     public ResponseEntity<List<Product>> searchProduct(@RequestParam String q) {
         var products = productService.getProducts();
         var result = new ArrayList<Product>();
@@ -57,6 +58,12 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@RequestBody Product product) {
         productService.updateProduct(product);
         return ResponseEntity.ok("Product updated successfully");
+    }
+
+    @DeleteMapping("products/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        productService.deleteProduct(id);
+        return ResponseEntity.ok("Product deleted successfully");
     }
     
 }

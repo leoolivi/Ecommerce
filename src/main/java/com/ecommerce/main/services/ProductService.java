@@ -44,4 +44,8 @@ public class ProductService {
         repo.save(currProduct);
     }
 
+    public void deleteProduct(Long id) {
+        repo.deleteById(id);
+    }
+
 }

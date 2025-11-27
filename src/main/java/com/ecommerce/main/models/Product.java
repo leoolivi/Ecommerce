@@ -32,4 +32,6 @@ public class Product {
     private Integer stockQuantity;
     @Column(nullable=false)
     private String category;
+    @Column(nullable=false)
+    private String imageUrl;
 }
