@@ -1,11 +1,11 @@
 package com.ecommerce.main.services;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.main.exceptions.ProductNotFoundException;
 import com.ecommerce.main.models.Product;
 import com.ecommerce.main.repositories.ProductRepository;
 
@@ -26,12 +26,12 @@ public class ProductService {
         return newProduct;
     }
 
-    public Optional<Product> findProductById(Long id) {
-        return repo.findById(id);
+    public Product findProductById(Long id) {
+        return repo.findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
-    public Optional<Product> findProductByName(String name) {
-        return repo.findByName(name);
+    public Product findProductByName(String name) {
+        return repo.findByName(name).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
     public void updateProduct(Product product) {

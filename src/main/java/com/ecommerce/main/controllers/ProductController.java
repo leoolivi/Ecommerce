@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ecommerce.main.exceptions.ProductNotFoundException;
 import com.ecommerce.main.models.Product;
 import com.ecommerce.main.services.ProductService;
 
@@ -35,7 +34,7 @@ public class ProductController {
 
     @GetMapping("product/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-        return ResponseEntity.ok(productService.findProductById(id).orElseThrow(() -> new ProductNotFoundException("No product found with id: " + id)));
+        return ResponseEntity.ok(productService.findProductById(id));
     }
 
     @GetMapping("search/products")
