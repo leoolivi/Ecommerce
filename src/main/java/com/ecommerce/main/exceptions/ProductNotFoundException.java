@@ -1,6 +1,6 @@
 package com.ecommerce.main.exceptions;
 
-public class ProductNotFoundException extends RuntimeException {
+public class ProductNotFoundException extends Exception {
     public ProductNotFoundException(String msg) {
         super(msg);
     }

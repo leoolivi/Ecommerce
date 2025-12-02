@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.ecommerce.main.models.Product;
 import com.ecommerce.main.services.ProductService;
+import com.ecommerce.main.services.SettingService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class ApplicationConfig {
 
     private final ProductService productService;
+    private final SettingService settingService;
     
     @Bean
     public CommandLineRunner commandLineRunner() {
@@ -21,7 +23,7 @@ public class ApplicationConfig {
             productService.addProduct(Product.builder()
                     .name("A qualcosa")
                     .description("Description")
-                    .price((float) 18.99)
+                    .price( 18.99)
                     .stockQuantity(10)
                     .category("Category 1")
                     .imageUrl("")
@@ -30,11 +32,13 @@ public class ApplicationConfig {
             productService.addProduct(Product.builder()
                     .name("B qualcosaltro")
                     .description("Description 2")
-                    .price((float) 12.99)
+                    .price(12.99)
                     .stockQuantity(5)
                     .category("Category 1")
                     .imageUrl("")
                     .build());
+
+            settingService.addSetting("shipping_fee", "10");
         };
     }
 }

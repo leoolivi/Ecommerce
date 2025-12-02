@@ -9,6 +9,7 @@ import com.ecommerce.main.exceptions.ProductNotFoundException;
 import com.ecommerce.main.models.Product;
 import com.ecommerce.main.repositories.ProductRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,14 +27,15 @@ public class ProductService {
         return newProduct;
     }
 
-    public Product findProductById(Long id) {
+    public Product findProductById(Long id) throws ProductNotFoundException {
         return repo.findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
-    public Product findProductByName(String name) {
+    public Product findProductByName(String name) throws ProductNotFoundException {
         return repo.findByName(name).orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
+    @Transactional
     public void updateProduct(Product product) {
         Product currProduct = repo.findById(product.getId()).orElseThrow(() -> new UsernameNotFoundException("Product not found"));
         if (product.getName() != null) currProduct.setName(product.getName());

@@ -1,5 +1,6 @@
 package com.ecommerce.main.models;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,25 +13,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Builder
-@Table(name="products")
-@Setter @Getter
 @Entity
+@Setter @Getter
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor(force = true)
-public class Product {
+@NoArgsConstructor(force=true)
+@Table(name="settings")
+public class Setting {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    @Column(unique=true, nullable=false)
-    private String name;
-    @Column(nullable=true)
-    private String description;
-    @Column(nullable=false)
-    private Double price;
-    @Column(nullable=false)
-    private Integer stockQuantity;
-    @Column(nullable=false)
-    private String category;
-    @Column(nullable=false)
-    private String imageUrl;
+    
+    @Column(name = "key_name", nullable=false, unique=true)
+    private String key;
+
+    @Column(name = "value_content", nullable=false, unique=false)
+    private String value;
+
+    @PostConstruct
+    public void init() {
+        System.out.println(">>> LOADING ENTITY SETTING");
+    }
 }
