@@ -56,4 +56,11 @@ public class OrderService {
         return prevOrder;
     }
 
+    @Transactional
+    public void updateOrderStatus(OrderRequestDTO request) throws OrderNotFoundException {
+        Order order = orderRepo.findById(request.getId()).orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        order.setStatus(request.getOrderStatus());
+        orderRepo.save(order);
+    }
+
 }

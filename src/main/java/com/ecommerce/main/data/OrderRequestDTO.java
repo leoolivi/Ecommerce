@@ -2,6 +2,9 @@ package com.ecommerce.main.data;
 
 import java.util.List;
 
+import com.ecommerce.main.models.PaymentMethod;
+import com.ecommerce.main.models.enums.OrderStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +19,6 @@ public class OrderRequestDTO {
     private List<Long> productIds;  // Solo gli ID dei prodotti
     private String shippingAddress;
     private Long customerId;
+    private PaymentMethod paymentMethod;
+    private OrderStatus orderStatus;
 }

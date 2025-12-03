@@ -2,8 +2,13 @@ package com.ecommerce.main.models;
 
 import java.util.List;
 
+import com.ecommerce.main.models.enums.OrderStatus;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -45,6 +50,15 @@ public class Order {
     
     @Column(name="customer_id", unique=false, nullable=true)
     private Long customerId;
+
+    @Column(unique=false, nullable=false)
+    @Embedded
+    private PaymentMethod payment;
+
+    @Column(unique=false, nullable=false)
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private OrderStatus status = OrderStatus.CREATED;
     
     @PrePersist
     @PreUpdate
