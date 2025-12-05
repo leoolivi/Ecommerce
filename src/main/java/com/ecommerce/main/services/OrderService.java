@@ -33,9 +33,9 @@ public class OrderService {
     
     public Order addOrder(OrderRequestDTO request) throws NumberFormatException, SettingNotFoundException {
         List<Product> products = productRepo.findAllById(request.getProductIds());
-        Order newOrder = Order.builder().products(products).shippingAddress(request.getShippingAddress()).customerId(request.getCustomerId()).build();
-        orderRepo.save(newOrder);
+        Order newOrder = Order.builder().products(products).shippingAddress(request.getShippingAddress()).customerId(request.getCustomerId()).payment(request.getPaymentMethod()).build();
         newOrder.calculateSubtotal(Double.parseDouble(settingService.getValueByKey("shipping_fee")));
+        newOrder = orderRepo.save(newOrder);
         return newOrder;
     }
 
@@ -50,6 +50,7 @@ public class OrderService {
         Order prevOrder = orderRepo.findById(request.getId()).orElseThrow(() -> new OrderNotFoundException("Order you want to edit does not exist!"));
         if (!products.isEmpty()) prevOrder.setProducts(products);
         if (!request.getShippingAddress().isBlank()) prevOrder.setShippingAddress(request.getShippingAddress());
+        if (!request.getOrderStatus().equals(null)) prevOrder.setStatus(request.getOrderStatus());
         prevOrder.setCustomerId(request.getCustomerId());
         prevOrder.calculateSubtotal( Double.parseDouble(settingService.getValueByKey("shipping_fee")));
         orderRepo.save(prevOrder);

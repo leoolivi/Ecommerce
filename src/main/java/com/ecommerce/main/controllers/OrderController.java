@@ -39,7 +39,7 @@ public class OrderController {
     }
 
     @PostMapping("orders")
-    public ResponseEntity<?> addOrder(@RequestBody OrderRequestDTO request) throws SettingNotFoundException, NumberFormatException, OrderNotFoundException {
+    public ResponseEntity<?> addOrder(@RequestBody OrderRequestDTO request) throws SettingNotFoundException, NumberFormatException, OrderNotFoundException, IllegalArgumentException {
         if (!facade.createOrder(request)) {
         return new ResponseEntity<>("There were some issues with payment", HttpStatus.BAD_REQUEST);
         }

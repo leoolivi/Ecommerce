@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderRequestDTO {
     private Long id;
-    private List<Long> productIds;  // Solo gli ID dei prodotti
+    private List<Long> productIds;
     private String shippingAddress;
     private Long customerId;
     private PaymentMethod paymentMethod;

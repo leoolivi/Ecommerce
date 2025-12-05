@@ -20,9 +20,9 @@ public class OrderFacade {
 
     public boolean createOrder(OrderRequestDTO request) throws NumberFormatException, SettingNotFoundException, OrderNotFoundException {
         var order = orderService.addOrder(request);
-        orderService.updateOrderStatus(OrderRequestDTO.builder().id(request.getId()).orderStatus(OrderStatus.PAYING).build());
+        orderService.updateOrderStatus(OrderRequestDTO.builder().id(order.getId()).orderStatus(OrderStatus.PAYING).build());
         if (paymentService.processPayment(order)) {
-            orderService.updateOrderStatus(OrderRequestDTO.builder().id(request.getId()).orderStatus(OrderStatus.PAID).build());
+            orderService.updateOrderStatus(OrderRequestDTO.builder().id(order.getId()).orderStatus(OrderStatus.PAID).build());
             return true;
         }
         return false;
