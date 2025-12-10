@@ -3,8 +3,11 @@ package com.ecommerce.main.configuration;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.ecommerce.main.models.Product;
+import com.ecommerce.main.repositories.AppUserRepository;
 import com.ecommerce.main.services.ProductService;
 import com.ecommerce.main.services.SettingService;
 
@@ -14,8 +17,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
+    private final AppUserRepository appUserRepository;
+
     private final ProductService productService;
     private final SettingService settingService;
+
+    ApplicationConfig(AppUserRepository appUserRepository) {
+        this.appUserRepository = appUserRepository;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService(String email, AppUserRepository repository) {
+        return (email) -> {
+            repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        };
+    }
     
     @Bean
     public CommandLineRunner commandLineRunner() {
