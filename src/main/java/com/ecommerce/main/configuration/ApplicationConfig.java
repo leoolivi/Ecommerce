@@ -4,7 +4,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.ecommerce.main.models.Product;
 import com.ecommerce.main.services.ProductService;
 import com.ecommerce.main.services.SettingService;
 
@@ -20,7 +19,7 @@ public class ApplicationConfig {
     @Bean
     public CommandLineRunner commandLineRunner() {
         return (String... args) -> {
-            productService.addProduct(Product.builder()
+            /* productService.addProduct(Product.builder()
                     .name("A qualcosa")
                     .description("Description")
                     .price( 18.99)
@@ -36,7 +35,7 @@ public class ApplicationConfig {
                     .stockQuantity(5)
                     .category("Category 1")
                     .imageUrl("")
-                    .build());
+                    .build()); */
 
             settingService.addSetting("shipping_fee", "10");
         };

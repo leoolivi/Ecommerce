@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@CrossOrigin(origins= "http://localhost:5173")
 public class ProductController {
 
     private final ProductService productService;
@@ -43,7 +45,7 @@ public class ProductController {
         var products = productService.getProducts();
         var result = new ArrayList<Product>();
         for (Product product: products) {
-            if(product.getName().contains(q)) result.add(product);
+            if(product.getName().toLowerCase().contains(q.toLowerCase()) || product.getName().toLowerCase().contains(q.toLowerCase()) ) result.add(product);
         }
         return ResponseEntity.ok(result);
     }
