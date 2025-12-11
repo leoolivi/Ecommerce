@@ -72,6 +72,12 @@ INSERT INTO order_product (order_id, product_id) VALUES
 -- Order 4: Camping Tent
 (4, 20);
 
+-- Base users
+INSERT INTO users (id, username, password, role) VALUES
+(1, 'mario.rossi@gmail.com', '$2a$12$me.6hrc/bQTMbRViFS0ss.WgEnmJykbbMknz7IiPMeiK0GfQHziGe', 'CUSTOMER'),
+(2, 'laura.bianchi@gmail.com', '$2a$12$me.6hrc/bQTMbRViFS0ss.WgEnmJykbbMknz7IiPMeiK0GfQHziGe', 'CUSTOMER'),
+(3, 'giuseppe.verdi@gmail.com', '$2a$12$me.6hrc/bQTMbRViFS0ss.WgEnmJykbbMknz7IiPMeiK0GfQHziGe', 'ADMIN');
+
 -- Reset sequences for auto-increment (PostgreSQL syntax)
 -- ALTER SEQUENCE products_seq RESTART WITH 31;
 -- ALTER SEQUENCE _orders_seq RESTART WITH 5;

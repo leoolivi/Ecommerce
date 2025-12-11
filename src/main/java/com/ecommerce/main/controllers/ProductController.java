@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,12 +36,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts());
     }
 
-    @GetMapping("product/{id}")
+    @GetMapping("products/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) throws ProductNotFoundException {
         return ResponseEntity.ok(productService.findProductById(id));
     }
 
-    @GetMapping("search/products")
+    @GetMapping("products/search")
     public ResponseEntity<List<Product>> searchProduct(@RequestParam String q) {
         var products = productService.getProducts();
         var result = new ArrayList<Product>();
@@ -50,18 +51,21 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("products")
     public ResponseEntity<?> addProduct(@RequestBody Product request) {
         productService.addProduct(request);
         return ResponseEntity.ok("Product added successfully");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("products")
     public ResponseEntity<?> updateProduct(@RequestBody Product product) {
         productService.updateProduct(product);
         return ResponseEntity.ok("Product updated successfully");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("products/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);

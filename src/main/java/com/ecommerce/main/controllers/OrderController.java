@@ -1,7 +1,12 @@
 package com.ecommerce.main.controllers;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +21,7 @@ import com.ecommerce.main.data.OrderRequestDTO;
 import com.ecommerce.main.exceptions.OrderNotFoundException;
 import com.ecommerce.main.exceptions.SettingNotFoundException;
 import com.ecommerce.main.facades.OrderFacade;
+import com.ecommerce.main.models.AppUser;
 import com.ecommerce.main.services.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,33 +35,39 @@ public class OrderController {
 
     private final OrderService service;
     private final OrderFacade facade;
+    private final UserDetailsService userDetailsService;
     
     @GetMapping("orders")
-    public ResponseEntity<?> getOrders() {
-        return ResponseEntity.ok(service.getOrders());
+    public ResponseEntity<?> getOrders(@AuthenticationPrincipal UserDetails principal) throws OrderNotFoundException {
+        AppUser details = (AppUser) userDetailsService.loadUserByUsername(principal.getUsername());
+        return ResponseEntity.ok(service.getOrdersOfCustomer(details.getId()));
     }
 
-    @GetMapping("order/{id}")
+    @GetMapping("orders/{id}")
     public ResponseEntity<?> getOrderById(@PathVariable Long id) throws OrderNotFoundException {
         return ResponseEntity.ok(service.findOrderById(id));
     }
 
     @PostMapping("orders")
-    public ResponseEntity<?> addOrder(@RequestBody OrderRequestDTO request) throws SettingNotFoundException, NumberFormatException, OrderNotFoundException, IllegalArgumentException {
+    public ResponseEntity<?> addOrder(@AuthenticationPrincipal UserDetails principal, @RequestBody OrderRequestDTO request) throws SettingNotFoundException, NumberFormatException, OrderNotFoundException, IllegalArgumentException {
+        AppUser details = (AppUser) userDetailsService.loadUserByUsername(principal.getUsername());
+        request.setCustomerId(details.getId());
         if (!facade.createOrder(request)) {
         return new ResponseEntity<>("There were some issues with payment", HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.ok("Order created successfully");
     }
 
-    @PutMapping("order")
-    public ResponseEntity<?> updateOrder(@RequestBody OrderRequestDTO request) throws OrderNotFoundException, SettingNotFoundException {
-        return ResponseEntity.ok(service.updateOrder(request));
+    @PutMapping("orders")
+    public ResponseEntity<?> updateOrder(@AuthenticationPrincipal UserDetails principal, @RequestBody OrderRequestDTO request) throws OrderNotFoundException, SettingNotFoundException, NumberFormatException, OperationNotSupportedException {
+        AppUser details = (AppUser) userDetailsService.loadUserByUsername(principal.getUsername());
+        return ResponseEntity.ok(service.updateOrderOfCustomer(request, details.getId()));
     }
 
-    @DeleteMapping("order/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) throws OrderNotFoundException {
-        service.deleteOrder(id);
+    @DeleteMapping("orders/{id}")
+    public ResponseEntity<?> cancelOrder(@AuthenticationPrincipal UserDetails principal, @PathVariable Long id) throws OrderNotFoundException, OperationNotSupportedException {
+        AppUser details = (AppUser) userDetailsService.loadUserByUsername(principal.getUsername());
+        service.deleteOrderOfCustomer(id, details.getId());
         return ResponseEntity.ok("Order deleted successfully");
     }
     

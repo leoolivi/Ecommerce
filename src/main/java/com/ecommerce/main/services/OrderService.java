@@ -2,6 +2,8 @@ package com.ecommerce.main.services;
 
 import java.util.List;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.main.data.OrderRequestDTO;
@@ -30,6 +32,16 @@ public class OrderService {
     public Order findOrderById(Long id) throws OrderNotFoundException {
         return orderRepo.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found"));
     }
+
+    public Order findOrderByIdOfCustomer(Long id, Long customerId) throws Exception {
+        Order order = orderRepo.findById(id).orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        if (order.getCustomerId() == customerId) throw new Exception("Could not read another customer orders");
+        return order;
+    }
+
+    public List<Order> getOrdersOfCustomer(Long customerId) throws OrderNotFoundException {
+        return orderRepo.findAllByCustomerId(customerId).orElseThrow(() -> new OrderNotFoundException("Order not found"));
+    } 
     
     public Order addOrder(OrderRequestDTO request) throws NumberFormatException, SettingNotFoundException {
         List<Product> products = productRepo.findAllById(request.getProductIds());
@@ -50,7 +62,24 @@ public class OrderService {
         Order prevOrder = orderRepo.findById(request.getId()).orElseThrow(() -> new OrderNotFoundException("Order you want to edit does not exist!"));
         if (!products.isEmpty()) prevOrder.setProducts(products);
         if (!request.getShippingAddress().isBlank()) prevOrder.setShippingAddress(request.getShippingAddress());
-        if (!request.getOrderStatus().equals(null)) prevOrder.setStatus(request.getOrderStatus());
+        if (request.getOrderStatus() != null ) prevOrder.setStatus(request.getOrderStatus());
+        prevOrder.setCustomerId(request.getCustomerId());
+        prevOrder.calculateSubtotal( Double.parseDouble(settingService.getValueByKey("shipping_fee")));
+        orderRepo.save(prevOrder);
+        return prevOrder;
+    }
+
+    @Transactional
+    public Order updateOrderOfCustomer(OrderRequestDTO request, Long customerId) throws OrderNotFoundException, NumberFormatException, SettingNotFoundException, OperationNotSupportedException {
+        if (request.getCustomerId().equals(customerId)) {
+            throw new OperationNotSupportedException("Could not edit an order of another user.");
+        }
+
+        List<Product> products = productRepo.findAllById(request.getProductIds());
+        Order prevOrder = orderRepo.findById(request.getId()).orElseThrow(() -> new OrderNotFoundException("Order you want to edit does not exist!"));
+        if (!products.isEmpty()) prevOrder.setProducts(products);
+        if (!request.getShippingAddress().isBlank()) prevOrder.setShippingAddress(request.getShippingAddress());
+        if (request.getOrderStatus() != null ) prevOrder.setStatus(request.getOrderStatus());
         prevOrder.setCustomerId(request.getCustomerId());
         prevOrder.calculateSubtotal( Double.parseDouble(settingService.getValueByKey("shipping_fee")));
         orderRepo.save(prevOrder);
@@ -62,6 +91,12 @@ public class OrderService {
         Order order = orderRepo.findById(request.getId()).orElseThrow(() -> new OrderNotFoundException("Order not found"));
         order.setStatus(request.getOrderStatus());
         orderRepo.save(order);
+    }
+
+    public void deleteOrderOfCustomer(Long orderId, Long customerId) throws OrderNotFoundException, OperationNotSupportedException {
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new OrderNotFoundException("Could not delete order with id " + orderId + " because it does not exist"));
+        if (order.getCustomerId() != customerId) throw new OperationNotSupportedException("Could not delete and order of another user.");
+        orderRepo.deleteById(orderId);
     }
 
 }
