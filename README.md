@@ -6,7 +6,84 @@ http://localhost:8080/api/v1
 ```
 
 ## Authentication
-Currently disabled - all endpoints are publicly accessible.
+
+The API uses **JWT (JSON Web Token)** for authentication. Include the token in the `Authorization` header:
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+### Default Test Users
+```
+Customer: mario.rossi@gmail.com / password
+Customer: laura.bianchi@gmail.com / password
+Admin: giuseppe.verdi@gmail.com / password
+```
+
+---
+
+## Authentication Endpoints
+
+### Register
+```http
+POST /auth/register
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600,
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "CUSTOMER"
+  }
+}
+```
+
+**Notes:**
+- New users are automatically assigned the `CUSTOMER` role
+- Password is encrypted with BCrypt
+- Token expires in 1 hour (3600 seconds)
+
+### Login
+```http
+POST /auth/login
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 3600,
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "CUSTOMER"
+  }
+}
+```
+
+**Errors:**
+- `401 Unauthorized` - Invalid credentials
+- `409 Conflict` - Email already exists (register only)
 
 ---
 
@@ -16,26 +93,28 @@ Currently disabled - all endpoints are publicly accessible.
 ```http
 GET /products
 ```
+**Auth Required:** Yes
 
 **Response:** `200 OK`
 ```json
 [
   {
     "id": 1,
-    "name": "Product Name",
-    "description": "Product description",
-    "price": 18.99,
-    "stockQuantity": 10,
-    "category": "Category 1",
-    "imageUrl": ""
+    "name": "Wireless Bluetooth Headphones",
+    "description": "Premium noise-cancelling headphones...",
+    "price": 89.99,
+    "stockQuantity": 45,
+    "category": "Electronics",
+    "imageUrl": "https://images.unsplash.com/photo-..."
   }
 ]
 ```
 
 ### Get Product by ID
 ```http
-GET /product/{id}
+GET /products/{id}
 ```
+**Auth Required:** Yes
 
 **Parameters:**
 - `id` (path) - Product ID
@@ -44,12 +123,12 @@ GET /product/{id}
 ```json
 {
   "id": 1,
-  "name": "Product Name",
-  "description": "Product description",
-  "price": 18.99,
-  "stockQuantity": 10,
-  "category": "Category 1",
-  "imageUrl": ""
+  "name": "Wireless Bluetooth Headphones",
+  "description": "Premium noise-cancelling headphones...",
+  "price": 89.99,
+  "stockQuantity": 45,
+  "category": "Electronics",
+  "imageUrl": "https://images.unsplash.com/photo-..."
 }
 ```
 
@@ -58,93 +137,37 @@ GET /product/{id}
 
 ### Search Products
 ```http
-GET /search/products?q={query}
+GET /products/search?q={query}
 ```
+**Auth Required:** Yes
 
 **Query Parameters:**
-- `q` (required) - Search query string
+- `q` (required) - Search query string (case-insensitive)
 
 **Response:** `200 OK`
 ```json
 [
   {
     "id": 1,
-    "name": "Matching Product",
-    "description": "Description",
-    "price": 18.99,
-    "stockQuantity": 10,
-    "category": "Category 1",
-    "imageUrl": ""
+    "name": "Wireless Bluetooth Headphones",
+    "description": "Premium noise-cancelling headphones...",
+    "price": 89.99,
+    "stockQuantity": 45,
+    "category": "Electronics",
+    "imageUrl": "https://images.unsplash.com/photo-..."
   }
 ]
 ```
 
-### Add Product
-```http
-POST /products
-```
-
-**Request Body:**
-```json
-{
-  "name": "New Product",
-  "description": "Product description",
-  "price": 29.99,
-  "stockQuantity": 50,
-  "category": "Category Name",
-  "imageUrl": "https://example.com/image.jpg"
-}
-```
-
-**Response:** `200 OK`
-```json
-"Product added successfully"
-```
-
-### Update Product
-```http
-PUT /products
-```
-
-**Request Body:**
-```json
-{
-  "id": 1,
-  "name": "Updated Name",
-  "description": "Updated description",
-  "price": 24.99,
-  "stockQuantity": 30,
-  "category": "Updated Category",
-  "imageUrl": "https://example.com/new-image.jpg"
-}
-```
-
-**Response:** `200 OK`
-```json
-"Product updated successfully"
-```
-
-### Delete Product
-```http
-DELETE /products/{id}
-```
-
-**Parameters:**
-- `id` (path) - Product ID
-
-**Response:** `200 OK`
-```json
-"Product deleted successfully"
-```
-
 ---
 
-## Orders
+## Orders (Customer)
 
-### Get All Orders
+### Get My Orders
 ```http
 GET /orders
 ```
+**Auth Required:** Yes (Customer or Admin)
 
 **Response:** `200 OK`
 ```json
@@ -152,15 +175,15 @@ GET /orders
   {
     "id": 1,
     "products": [...],
-    "subtotal": 28.99,
-    "shippingAddress": "123 Main St, City, Country",
+    "subtotal": 109.98,
+    "shippingAddress": "Via Roma 123, Roma",
     "customerId": 1,
     "payment": {
       "type": "CREDIT_CARD",
       "cardNumber": "1234567890123456",
-      "cardHolder": "John Doe",
+      "cardHolder": "Mario Rossi",
       "expiryMonth": "12",
-      "expiryYear": "2025",
+      "expiryYear": "2026",
       "cvc": "123"
     },
     "status": "PAID"
@@ -168,10 +191,15 @@ GET /orders
 ]
 ```
 
+**Notes:**
+- Returns only orders belonging to the authenticated customer
+- `customerId` is automatically set from JWT token
+
 ### Get Order by ID
 ```http
-GET /order/{id}
+GET /orders/{id}
 ```
+**Auth Required:** Yes
 
 **Parameters:**
 - `id` (path) - Order ID
@@ -181,8 +209,8 @@ GET /order/{id}
 {
   "id": 1,
   "products": [...],
-  "subtotal": 28.99,
-  "shippingAddress": "123 Main St",
+  "subtotal": 109.98,
+  "shippingAddress": "Via Roma 123",
   "customerId": 1,
   "payment": {...},
   "status": "PAID"
@@ -191,24 +219,25 @@ GET /order/{id}
 
 **Errors:**
 - `404 Not Found` - Order not found
+- `401 Unauthorized` - Cannot read another customer's orders
 
 ### Create Order
 ```http
 POST /orders
 ```
+**Auth Required:** Yes
 
 **Request Body:**
 ```json
 {
   "productIds": [1, 2],
-  "shippingAddress": "123 Main St, City, Country",
-  "customerId": 1,
+  "shippingAddress": "Via Roma 123, Roma, Italy",
   "paymentMethod": {
     "type": "CREDIT_CARD",
     "cardNumber": "1234567890123456",
-    "cardHolder": "John Doe",
+    "cardHolder": "Mario Rossi",
     "expiryMonth": "12",
-    "expiryYear": "2025",
+    "expiryYear": "2026",
     "cvc": "123"
   }
 }
@@ -224,22 +253,23 @@ POST /orders
 - `404 Not Found` - Setting not found (shipping_fee)
 
 **Notes:**
+- `customerId` is automatically extracted from JWT token
 - Subtotal is automatically calculated including shipping fee
 - Order status flow: CREATED → PAYING → PAID
-- Payment is validated (card number must be at least 12 characters)
+- Card number must be at least 12 characters
 
 ### Update Order
 ```http
-PUT /order
+PUT /orders
 ```
+**Auth Required:** Yes
 
 **Request Body:**
 ```json
 {
   "id": 1,
   "productIds": [1, 3],
-  "shippingAddress": "456 New Address",
-  "customerId": 1,
+  "shippingAddress": "Via Nuova 456",
   "orderStatus": "SHIPPED"
 }
 ```
@@ -249,8 +279,8 @@ PUT /order
 {
   "id": 1,
   "products": [...],
-  "subtotal": 35.99,
-  "shippingAddress": "456 New Address",
+  "subtotal": 119.98,
+  "shippingAddress": "Via Nuova 456",
   "customerId": 1,
   "payment": {...},
   "status": "SHIPPED"
@@ -259,11 +289,82 @@ PUT /order
 
 **Errors:**
 - `404 Not Found` - Order not found
+- `401 Unauthorized` - Cannot edit another customer's orders
 
-### Delete Order
+### Cancel Order
 ```http
-DELETE /order/{id}
+PATCH /orders/{id}
 ```
+**Auth Required:** Yes
+
+**Parameters:**
+- `id` (path) - Order ID
+
+**Response:** `200 OK`
+```json
+"Order canceled successfully"
+```
+
+**Errors:**
+- `404 Not Found` - Order not found
+- `401 Unauthorized` - Cannot cancel another customer's orders
+
+---
+
+## Admin Endpoints
+
+All admin endpoints require the `ADMIN` role.
+
+### Orders Management
+
+#### Get All Orders (Admin)
+```http
+GET /admin/orders
+```
+**Auth Required:** Yes (Admin only)
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "products": [...],
+    "subtotal": 109.98,
+    "shippingAddress": "Via Roma 123",
+    "customerId": 1,
+    "payment": {...},
+    "status": "PAID"
+  }
+]
+```
+
+#### Get Order by ID (Admin)
+```http
+GET /admin/orders/{id}
+```
+**Auth Required:** Yes (Admin only)
+
+#### Create Order (Admin)
+```http
+POST /admin/orders
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:** Same as customer order creation
+
+#### Update Order (Admin)
+```http
+PUT /admin/orders
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:** Same as customer order update
+
+#### Delete Order (Admin)
+```http
+PUT /admin/orders/{id}
+```
+**Auth Required:** Yes (Admin only)
 
 **Parameters:**
 - `id` (path) - Order ID
@@ -273,23 +374,187 @@ DELETE /order/{id}
 "Order deleted successfully"
 ```
 
+### Products Management
+
+#### Add Product
+```http
+POST /admin/products
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:**
+```json
+{
+  "name": "New Product",
+  "description": "Product description",
+  "price": 29.99,
+  "stockQuantity": 50,
+  "category": "Electronics",
+  "imageUrl": "https://example.com/image.jpg"
+}
+```
+
+**Response:** `200 OK`
+```json
+"Product added successfully"
+```
+
+#### Update Product
+```http
+PUT /admin/products
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:**
+```json
+{
+  "id": 1,
+  "name": "Updated Product",
+  "description": "Updated description",
+  "price": 39.99,
+  "stockQuantity": 30,
+  "category": "Electronics",
+  "imageUrl": "https://example.com/new-image.jpg"
+}
+```
+
+**Response:** `200 OK`
+```json
+"Product updated successfully"
+```
+
+#### Delete Product
+```http
+DELETE /admin/products/{id}
+```
+**Auth Required:** Yes (Admin only)
+
+**Parameters:**
+- `id` (path) - Product ID
+
+**Response:** `200 OK`
+```json
+"Product deleted successfully"
+```
+
+### User Management
+
+#### Get All Users
+```http
+GET /admin/users
+```
+**Auth Required:** Yes (Admin only)
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "email": "user@example.com",
+    "password": "$2a$12$...",
+    "role": "CUSTOMER",
+    "authorities": [...]
+  }
+]
+```
+
+#### Get User by ID
+```http
+GET /admin/users/{id}
+```
+**Auth Required:** Yes (Admin only)
+
+**Parameters:**
+- `id` (path) - User ID
+
+#### Create User
+```http
+POST /admin/users
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:**
+```json
+{
+  "email": "newuser@example.com",
+  "password": "password123",
+  "role": "CUSTOMER"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": 4,
+  "email": "newuser@example.com",
+  "role": "CUSTOMER"
+}
+```
+
 **Errors:**
-- `404 Not Found` - Order not found
+- `409 Conflict` - User already exists
+
+#### Update User
+```http
+PUT /admin/users
+```
+**Auth Required:** Yes (Admin only)
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "newpassword",
+  "role": "ADMIN"
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "password": "$2a$12$...",
+  "role": "ADMIN",
+  "authorities": [...]
+}
+```
+
+#### Delete User
+```http
+DELETE /admin/users/{id}
+```
+**Auth Required:** Yes (Admin only)
+
+**Parameters:**
+- `id` (path) - User ID
+
+**Response:** `200 OK`
 
 ---
 
 ## Data Models
 
+### User
+```typescript
+{
+  id: number
+  email: string           // unique, required
+  password: string        // BCrypt hashed
+  role: "CUSTOMER" | "ADMIN"
+}
+```
+
 ### Product
 ```typescript
 {
   id: number
-  name: string          // unique, required
-  description: string   // optional
-  price: number         // required
-  stockQuantity: number // required
-  category: string      // required
-  imageUrl: string      // required
+  name: string            // unique, required
+  description: string     // optional
+  price: number           // required
+  stockQuantity: number   // required
+  category: string        // required
+  imageUrl: string        // required
 }
 ```
 
@@ -300,7 +565,7 @@ DELETE /order/{id}
   products: Product[]
   subtotal: number              // auto-calculated
   shippingAddress: string       // required
-  customerId: number            // optional
+  customerId: number            // auto-set from JWT
   payment: PaymentMethod        // required
   status: OrderStatus           // default: CREATED
 }
@@ -318,6 +583,19 @@ DELETE /order/{id}
 }
 ```
 
+### AuthResponse
+```typescript
+{
+  accessToken: string
+  expiresIn: number     // seconds
+  user: {
+    id: number
+    email: string
+    role: "CUSTOMER" | "ADMIN"
+  }
+}
+```
+
 ### OrderStatus Enum
 - `CREATED` - Order has been created
 - `PAYING` - Payment is being processed
@@ -325,15 +603,9 @@ DELETE /order/{id}
 - `SHIPPED` - Order has been shipped
 - `CANCELED` - Order has been canceled
 
----
-
-## Settings
-
-The application uses a settings system for configuration values:
-
-- **shipping_fee**: Shipping cost added to all orders (default: "10")
-
-Settings are initialized on application startup and can be modified through the SettingService.
+### AppUserRole Enum
+- `CUSTOMER` - Regular customer with basic permissions
+- `ADMIN` - Administrator with full access
 
 ---
 
@@ -343,19 +615,119 @@ All error responses follow this format:
 
 ```json
 {
-  "timestamp": "2024-12-08T10:30:00",
-  "status": 404,
-  "error": "Not Found",
-  "message": "Product not found",
-  "path": "/api/v1/product/999"
+  "error": "UNAUTHORIZED",
+  "message": "Invalid email or password",
+  "status": 401,
+  "path": "/api/v1/auth/login",
+  "timestamp": "2024-12-12T10:30:00"
 }
 ```
 
 ### Common HTTP Status Codes
 - `200 OK` - Request successful
 - `400 Bad Request` - Invalid request data
+- `401 Unauthorized` - Authentication failed or token invalid/expired
+- `403 Forbidden` - Insufficient permissions
 - `404 Not Found` - Resource not found
+- `409 Conflict` - Resource already exists
 - `500 Internal Server Error` - Server error
+
+### JWT-Specific Errors
+
+**Invalid Token Signature:**
+```json
+{
+  "error": "UNAUTHORIZED",
+  "message": "Invalid token signature",
+  "status": 401,
+  "path": "/api/v1/orders",
+  "timestamp": "2024-12-12T10:30:00"
+}
+```
+
+**Token Expired:**
+```json
+{
+  "error": "UNAUTHORIZED",
+  "message": "Token expired",
+  "status": 401,
+  "path": "/api/v1/orders",
+  "timestamp": "2024-12-12T10:30:00"
+}
+```
+
+**Malformed Token:**
+```json
+{
+  "error": "UNAUTHORIZED",
+  "message": "Malformed or invalid token",
+  "status": 401,
+  "path": "/api/v1/orders",
+  "timestamp": "2024-12-12T10:30:00"
+}
+```
+
+---
+
+## Authorization Matrix
+
+| Endpoint | Anonymous | Customer | Admin |
+|----------|-----------|----------|-------|
+| POST /auth/register | ✅ | ✅ | ✅ |
+| POST /auth/login | ✅ | ✅ | ✅ |
+| GET /products | ❌ | ✅ | ✅ |
+| GET /products/{id} | ❌ | ✅ | ✅ |
+| GET /products/search | ❌ | ✅ | ✅ |
+| GET /orders | ❌ | ✅ (own) | ✅ (own) |
+| GET /orders/{id} | ❌ | ✅ (own) | ✅ (own) |
+| POST /orders | ❌ | ✅ | ✅ |
+| PUT /orders | ❌ | ✅ (own) | ✅ (own) |
+| PATCH /orders/{id} | ❌ | ✅ (own) | ✅ (own) |
+| GET /admin/orders | ❌ | ❌ | ✅ |
+| POST /admin/products | ❌ | ❌ | ✅ |
+| PUT /admin/products | ❌ | ❌ | ✅ |
+| DELETE /admin/products/{id} | ❌ | ❌ | ✅ |
+| GET /admin/users | ❌ | ❌ | ✅ |
+| POST /admin/users | ❌ | ❌ | ✅ |
+| PUT /admin/users | ❌ | ❌ | ✅ |
+| DELETE /admin/users/{id} | ❌ | ❌ | ✅ |
+
+---
+
+## Settings
+
+The application uses a settings system for configuration values:
+
+- **shipping_fee**: Shipping cost added to all orders (default: "10")
+- **tax_rate**: Tax rate (default: "0.22")
+- **currency**: Currency code (default: "EUR")
+- **store_name**: Store name (default: "Tech & Lifestyle Store")
+- **support_email**: Support email (default: "support@ecommerce.com")
+
+Settings are initialized on application startup via `data.sql`.
+
+---
+
+## Security Features
+
+1. **JWT Authentication**: Tokens expire after 1 hour
+2. **Password Encryption**: BCrypt with salt rounds
+3. **CORS Enabled**: Configured for `http://localhost:5173` (frontend)
+4. **CSRF Disabled**: API is stateless
+5. **Role-Based Access Control**: `@PreAuthorize` annotations
+6. **Custom Exception Handling**: Centralized error responses
+7. **Token Validation**: Signature and expiration checks
+
+---
+
+## Development Notes
+
+1. **Database**: H2 in-memory database (auto-recreated on restart)
+2. **Data Initialization**: `data.sql` loads test users on startup
+3. **Payment Processing**: Currently mocked - all payments succeed after validation
+4. **Shipping Fee**: Automatically added to order subtotals
+5. **Search**: Case-insensitive partial match on product name
+6. **Subtotal Calculation**: Automatically calculated on order creation/update
 
 ---
 
@@ -365,6 +737,7 @@ All error responses follow this format:
 ```http
 GET /test/?p={param}
 ```
+**Auth Required:** No
 
 **Query Parameters:**
 - `p` (required) - Test parameter
@@ -373,13 +746,3 @@ GET /test/?p={param}
 ```
 Test endpoint. Param = {param}
 ```
-
----
-
-## Notes
-
-1. **Security**: Authentication is currently disabled. All endpoints are publicly accessible.
-2. **Payment Processing**: Currently mocked - all payments return success after validation.
-3. **Shipping Fee**: Automatically added to order subtotals from settings.
-4. **Product Search**: Case-sensitive partial match on product name.
-5. **Subtotal Calculation**: Automatically calculated on order creation/update including shipping fee.
