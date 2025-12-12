@@ -24,9 +24,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
                 auth -> auth
-                .requestMatchers("/api/v1/auth").permitAll()
-                .requestMatchers("/api/v1/orders").authenticated()
-                .requestMatchers("/api/v1/orders").authenticated().anyRequest().permitAll()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/orders/**").authenticated()
+                .requestMatchers("/api/v1/admin/**").authenticated()
+                .requestMatchers("/api/v1/products/**").authenticated().anyRequest().permitAll()
             )
             .csrf(AbstractHttpConfigurer::disable)
             .formLogin(Customizer.withDefaults())

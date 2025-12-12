@@ -1,6 +1,7 @@
 package com.ecommerce.main.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,5 +33,11 @@ public class AuthController {
     public ResponseEntity<AuthResponseDTO> register(@RequestBody RegisterRequestDTO request) {
         return ResponseEntity.ok(authenticationService.register(request));
     }
+
+    @PostMapping("password-reset/{code}")
+    public String passwordReset(@PathVariable String code) {
+        return null;
+    }
+    
     
 }

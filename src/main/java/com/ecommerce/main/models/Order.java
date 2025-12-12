@@ -48,7 +48,6 @@ public class Order {
     @Column(unique=false, nullable=false)
     private String shippingAddress;
     
-    @ManyToMany
     @Column(name="customer_id", unique=false, nullable=true)
     private Long customerId;
 
