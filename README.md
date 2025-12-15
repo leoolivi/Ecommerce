@@ -85,6 +85,50 @@ POST /auth/login
 - `401 Unauthorized` - Invalid credentials
 - `409 Conflict` - Email already exists (register only)
 
+### Password Reset Request
+```http
+POST /auth/password-reset
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response:** `200 OK`
+```json
+"Email sent to user@example.com with the code."
+```
+
+**Notes:**
+- Generates a 4-digit OTP code
+- Code expires after 10 minutes
+- Email is sent via Mailtrap
+
+### Password Reset Verification
+```http
+POST /auth/password-reset-check
+```
+
+**Request Body:**
+```json
+{
+  "otp": "1234",
+  "newPassword": "newpassword123"
+}
+```
+
+**Response:** `200 OK`
+```json
+"Password changed successfully"
+```
+
+**Errors:**
+- `404 Not Found` - OTP code not found
+- `200 OK` with message "Code not valid" - OTP expired or invalid
+
 ---
 
 ## Products
@@ -93,7 +137,7 @@ POST /auth/login
 ```http
 GET /products
 ```
-**Auth Required:** Yes
+**Auth Required:** No (public endpoint)
 
 **Response:** `200 OK`
 ```json
@@ -114,7 +158,7 @@ GET /products
 ```http
 GET /products/{id}
 ```
-**Auth Required:** Yes
+**Auth Required:** No (public endpoint)
 
 **Parameters:**
 - `id` (path) - Product ID
@@ -139,7 +183,7 @@ GET /products/{id}
 ```http
 GET /products/search?q={query}
 ```
-**Auth Required:** Yes
+**Auth Required:** No (public endpoint)
 
 **Query Parameters:**
 - `q` (required) - Search query string (case-insensitive)
@@ -583,6 +627,18 @@ DELETE /admin/users/{id}
 }
 ```
 
+### OTPCode
+```typescript
+{
+  id: number
+  code: char[]              // 4-digit code
+  issuedAt: LocalDateTime
+  expiresAt: LocalDateTime  // +10 minutes from issuedAt
+  userEmail: string
+  userId: number
+}
+```
+
 ### AuthResponse
 ```typescript
 {
@@ -675,9 +731,11 @@ All error responses follow this format:
 |----------|-----------|----------|-------|
 | POST /auth/register | ✅ | ✅ | ✅ |
 | POST /auth/login | ✅ | ✅ | ✅ |
-| GET /products | ❌ | ✅ | ✅ |
-| GET /products/{id} | ❌ | ✅ | ✅ |
-| GET /products/search | ❌ | ✅ | ✅ |
+| POST /auth/password-reset | ✅ | ✅ | ✅ |
+| POST /auth/password-reset-check | ✅ | ✅ | ✅ |
+| GET /products | ✅ | ✅ | ✅ |
+| GET /products/{id} | ✅ | ✅ | ✅ |
+| GET /products/search | ✅ | ✅ | ✅ |
 | GET /orders | ❌ | ✅ (own) | ✅ (own) |
 | GET /orders/{id} | ❌ | ✅ (own) | ✅ (own) |
 | POST /orders | ❌ | ✅ | ✅ |
@@ -704,7 +762,54 @@ The application uses a settings system for configuration values:
 - **store_name**: Store name (default: "Tech & Lifestyle Store")
 - **support_email**: Support email (default: "support@ecommerce.com")
 
-Settings are initialized on application startup via `data.sql`.
+Settings are initialized on application startup via `ApplicationConfig.commandLineRunner()`.
+
+---
+
+## Email & OTP System
+
+### Email Configuration (Mailtrap)
+
+The application uses **Mailtrap** for sending emails. Two modes are available:
+
+**Sandbox Mode** (Testing - emails NOT sent):
+```properties
+mailtrap.token=your_sandbox_token
+mailtrap.sandbox=true
+mailtrap.inbox.id=your_inbox_id
+```
+
+**Production Mode** (Real emails):
+```properties
+mailtrap.token=your_production_token
+mailtrap.sandbox=false
+```
+
+### OTP Code System
+
+- **Code Length**: 4 digits
+- **Expiration Time**: 10 minutes
+- **Generation**: Random numeric code
+- **Usage**: Password reset functionality
+- **Storage**: Persisted in database with expiration timestamp
+
+**Factory Methods:**
+```java
+// Default 10-minute expiration
+OTPCode.create(char[] code, String email, Long userId)
+
+// Custom expiration time
+OTPCode.create(char[] code, String email, Long userId, int minutes)
+```
+
+**Validation:**
+```java
+// Check if code is expired
+boolean isExpired()
+
+// Service validation (checks expiration + code match)
+boolean isCodeValid(OTPCode code)
+```
 
 ---
 
@@ -717,6 +822,8 @@ Settings are initialized on application startup via `data.sql`.
 5. **Role-Based Access Control**: `@PreAuthorize` annotations
 6. **Custom Exception Handling**: Centralized error responses
 7. **Token Validation**: Signature and expiration checks
+8. **OTP Security**: Time-limited one-time passwords
+9. **Password Hashing**: All passwords encrypted before storage
 
 ---
 
@@ -728,6 +835,8 @@ Settings are initialized on application startup via `data.sql`.
 4. **Shipping Fee**: Automatically added to order subtotals
 5. **Search**: Case-insensitive partial match on product name
 6. **Subtotal Calculation**: Automatically calculated on order creation/update
+7. **Email Service**: Mailtrap integration for transactional emails
+8. **Password Recovery**: OTP-based system with 10-minute expiration
 
 ---
 
@@ -746,3 +855,18 @@ GET /test/?p={param}
 ```
 Test endpoint. Param = {param}
 ```
+
+---
+
+## API Changes from Previous Version
+
+### New Features
+- ✅ **Password Reset System**: OTP-based password recovery
+- ✅ **Email Integration**: Mailtrap for sending emails
+- ✅ **Public Product Endpoints**: Products are now accessible without authentication
+- ✅ **Enhanced CORS**: Improved configuration for frontend integration
+- ✅ **Password Encoding in User Service**: Automatic password hashing on user updates
+
+### Breaking Changes
+- ⚠️ **Products endpoints are now PUBLIC**: No authentication required for GET operations
+- ⚠️ **Password field handling**: Empty passwords no longer update existing passwords
