@@ -32,6 +32,11 @@
 }
 
 {
+    "newPassword":"password11",
+    "otp":"3725"
+}
+
+{
     "email":"giuseppe.verdi@gmail.com",
     "password":"password"
 }

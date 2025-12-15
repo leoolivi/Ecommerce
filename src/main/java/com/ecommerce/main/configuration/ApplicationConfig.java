@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ecommerce.main.repositories.AppUserRepository;
 import com.ecommerce.main.services.SettingService;
+import com.ecommerce.main.utility.EmailUtility;
 
 import lombok.AllArgsConstructor;
 
@@ -23,6 +24,7 @@ public class ApplicationConfig {
 
     private final SettingService settingService;
     private final AppUserRepository repository;
+    private final EmailUtility emailUtility;
 
     @Bean
     public UserDetailsService userDetailsService(AppUserRepository repository) {
@@ -35,6 +37,7 @@ public class ApplicationConfig {
     public CommandLineRunner commandLineRunner() {
         return (String... args) -> {
             settingService.addSetting("shipping_fee", "10");
+            // emailUtility.sendEmail("leolivieri1910@gmail.com", "TEST", "prova da ecommerce");
         };
     }
 

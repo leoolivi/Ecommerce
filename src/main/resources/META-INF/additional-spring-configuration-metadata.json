@@ -8,5 +8,20 @@
     "name": "jwt.expiration",
     "type": "java.lang.String",
     "description": "A description for 'jwt.expiration'"
+  },
+  {
+    "name": "mailtrap.token",
+    "type": "java.lang.String",
+    "description": "A description for 'mailtrap.token'"
+  },
+  {
+    "name": "mailtrap.inbox.id",
+    "type": "java.lang.String",
+    "description": "A description for 'mailtrap.inbox.id'"
+  },
+  {
+    "name": "mailtrap.sandbox",
+    "type": "java.lang.String",
+    "description": "A description for 'mailtrap.sandbox'"
   }
 ]}
