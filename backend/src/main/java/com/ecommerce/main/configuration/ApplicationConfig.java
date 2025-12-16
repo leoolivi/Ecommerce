@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.ecommerce.main.models.AppUser;
+import com.ecommerce.main.models.enums.AppUserRole;
 import com.ecommerce.main.repositories.AppUserRepository;
 import com.ecommerce.main.services.SettingService;
 import com.ecommerce.main.utility.EmailUtility;
@@ -37,6 +39,11 @@ public class ApplicationConfig {
     public CommandLineRunner commandLineRunner() {
         return (String... args) -> {
             settingService.addSetting("shipping_fee", "10");
+            repository.save(AppUser.builder()
+                            .email("leolivieri1910@gmail.com")
+                            .password(passwordEncoder().encode("password"))
+                            .role(AppUserRole.ADMIN)
+                            .build());
             // emailUtility.sendEmail("leolivieri1910@gmail.com", "TEST", "prova da ecommerce");
         };
     }
