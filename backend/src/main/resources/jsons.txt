@@ -1,0 +1,51 @@
+{
+    "productIds":[2,4],
+    "shippingAddress":"Via Garibaldi 1",
+    "paymentMethod":{
+        "type":"CREDIT_CARD",
+        "cardNumber":"123456789123",
+        "cardHolder":"Leonardo Olivieri",
+        "expiryMonth":"04",
+        "expiryYear":"2027",
+        "cvc":"012"
+    }
+}
+
+{
+    "id":1,
+    "productIds":[3,5],
+    "shippingAddress":"Via Garibaldi 2",
+    "paymentMethod":{
+        "type":"STRIPE",
+        "cardNumber":"123456789124",
+        "cardHolder":"Leonardo Olivieri",
+        "expiryMonth":"05",
+        "expiryYear":"2028",
+        "cvc":"012"
+    },
+    "orderStatus":"SHIPPED"
+}
+
+{
+    "email":"mario.rossi@gmail.com",
+    "password":"password"
+}
+
+{
+    "newPassword":"password11",
+    "otp":"3725"
+}
+
+{
+    "email":"giuseppe.verdi@gmail.com",
+    "password":"password"
+}
+
+{
+    "name":"Prodotto A",
+    "description":"Descrizione",
+    "price":9.99,
+    "stockQuantity": 5,
+    "category":"A",
+    "imageUrl":"url"
+}
